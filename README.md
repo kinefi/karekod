@@ -1,6 +1,6 @@
-# 🚀 Hızlı & Ücretsiz QR Kod Üretici
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-2ea44f?style=for-the-badge&logo=github)](https://kinefi.github.io/karekod)
 
-[![GitHub Pages](https://img.shields.io/badge/Live_Demo-GitHub_Pages-2ea44f?style=for-the-badge&logo=github)](https://kinefi.github.io/karekod)
+# 🚀 Hızlı & Ücretsiz QR Kod Üretici
 
 Süresi asla dolmayan, tamamen ücretsiz ve kayıt gerektirmeyen web tabanlı statik QR kod üretici.
 
@@ -10,18 +10,19 @@ Bütün işlemler doğrudan tarayıcınızda (JavaScript) gerçekleştiği için
 
 ## ✨ Özellikler
 
-- 🔒 **Ömür Boyu Ücretsiz & Statik:** Oluşturulan QR kodlar doğrudan veriyi işler, yönlendirme sunucusu kullanmaz ve süresi dolmaz.
+- 🔒 **Ömür Boyu Ücretsiz & Statik:** Yönlendirme sunucusu kullanmaz, oluşturulan kodların süresi dolmaz.
+- 💾 **PNG İndirme Desteği:** Oluşturulan QR kodları tek tıkla cihazınıza indirebilirsiniz.
+- 🎲 **Rastgele Hex Dosya İsimleri:** İndirilen görseller çakışmayı önlemek için otomatik rastgele hex isimleri alır (örneğin `a3f91b2c.png`).
 - 🎨 **Özelleştirilebilir Renkler:** Çizgi ve arka plan renklerini dilediğiniz gibi seçebilirsiniz.
 - ⚡ **Anında Üretim:** Sunucu bekleme süresi olmadan milisaniyeler içinde QR kod oluşturur.
-- 📱 **Mobil Uyumlu:** Masaüstü ve mobil cihazlarda sorunsuz çalışır.
-- 🛡️ **Gizlilik Dostu:** Girdiğiniz veriler hiçbir yere kaydedilmez.
+- 🛡️ **Gizlilik Dostu:** İstemci taraflı (client-side) çalışır, verileriniz sunuculara iletilmez.
 
 ---
 
 ## 🛠️ Kullanılan Teknolojiler
 
-- **HTML5 & CSS3** - Responsive arayüz tasarımı
-- **JavaScript (ES6+)** - Dinamik form yönetimi
+- **HTML5 & CSS3** - Responsive ve modern arayüz
+- **JavaScript (ES6+)** - Dinamik form yönetimi ve Web Crypto API (Hex üretimi için)
 - **QRCode.js** - İstemci taraflı QR kod oluşturma kütüphanesi
 
 ---
@@ -32,4 +33,4 @@ Bu projeyi bilgisayarınızda çalıştırmak için herhangi bir sunucu veya pak
 
 1. Depoyu klonlayın:
    ```bash
-   git clone [https://github.com/kullanici-adiniz/depo-adiniz.git](https://github.com/kullanici-adiniz/depo-adiniz.git)
+   git clone [https://github.com/kinefi/karekod.git](https://github.com/kinefi/karekod.git)
