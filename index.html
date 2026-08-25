@@ -58,6 +58,15 @@
             transition: 0.2s;
         }
         button:hover { background-color: #1d4ed8; }
+
+        /* İndirme Düğmesi Stili */
+        .download-btn {
+            background-color: #10b981;
+            margin-top: 15px;
+            display: none; /* QR kod oluşturulana kadar gizli */
+        }
+        .download-btn:hover { background-color: #059669; }
+
         #qrcode {
             margin-top: 20px;
             display: flex;
@@ -87,6 +96,9 @@
     <button onclick="generateQR()">QR Kod Oluştur</button>
 
     <div id="qrcode"></div>
+
+    <!-- İndirme Düğmesi -->
+    <button id="downloadBtn" class="download-btn" onclick="downloadQR()">PNG Olarak İndir</button>
 </div>
 
 <script>
@@ -97,6 +109,7 @@
         const colorDark = document.getElementById("colorDark").value;
         const colorLight = document.getElementById("colorLight").value;
         const qrContainer = document.getElementById("qrcode");
+        const downloadBtn = document.getElementById("downloadBtn");
 
         if (!text.trim()) {
             alert("Lütfen bir metin veya URL girin!");
@@ -109,12 +122,49 @@
         // Yeni QR kod oluştur
         qrcode = new QRCode(qrContainer, {
             text: text,
-            width: 200,
-            height: 200,
+            width: 250,
+            height: 250,
             colorDark : colorDark,
             colorLight : colorLight,
             correctLevel : QRCode.CorrectLevel.H
         });
+
+        // QR kod oluşturulduktan hemen sonra indirme butonunu göster
+        downloadBtn.style.display = "block";
+    }
+
+    // Rastgele Hex Metin Üreten Fonksiyon (Örn: 4a9f1b2c)
+    function getRandomHex(length = 8) {
+        const bytes = new Uint8Array(length / 2);
+        window.crypto.getRandomValues(bytes);
+        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function downloadQR() {
+        const qrContainer = document.getElementById("qrcode");
+        const canvas = qrContainer.querySelector("canvas");
+        const img = qrContainer.querySelector("img");
+
+        let imageSrc = "";
+        if (canvas) {
+            imageSrc = canvas.toDataURL("image/png");
+        } else if (img && img.src) {
+            imageSrc = img.src;
+        } else {
+            alert("QR Kod indirilemedi!");
+            return;
+        }
+
+        // Rastgele 8 karakterlik hex isim + .png (Örn: c8f3a1e9.png)
+        const fileName = getRandomHex(8) + ".png";
+
+        // İndirme işlemini tetikle
+        const link = document.createElement("a");
+        link.href = imageSrc;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 
