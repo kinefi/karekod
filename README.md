@@ -1,5 +1,7 @@
 # 🚀 Hızlı & Ücretsiz QR Kod Üretici
 
+[![GitHub Pages](https://img.shields.io/badge/Live_Demo-GitHub_Pages-2ea44f?style=for-the-badge&logo=github)](https://kinefi.github.io/karekod)
+
 Süresi asla dolmayan, tamamen ücretsiz ve kayıt gerektirmeyen web tabanlı statik QR kod üretici.
 
 Bütün işlemler doğrudan tarayıcınızda (JavaScript) gerçekleştiği için verileriniz hiçbir sunucuya gönderilmez ve kodlarınız ömür boyu çalışmaya devam eder.
