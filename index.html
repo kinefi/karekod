@@ -1,15 +1,49 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Süresiz ve Ücretsiz QR Kod Üretici</title>
-    <!-- QR Kod Oluşturma Kütüphanesi -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- QR Kod Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+        integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
+
+    <!-- PDF Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
     <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --subtext-color: #666666;
+            --border-color: #cccccc;
+            --primary-btn: #2563eb;
+            --primary-btn-hover: #1d4ed8;
+            --success-btn: #10b981;
+            --success-btn-hover: #059669;
+        }
+
+        /* Otomatik Koyu Tema */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --card-bg: #1e293b;
+                --text-color: #f8fafc;
+                --subtext-color: #94a3b8;
+                --border-color: #334155;
+            }
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -18,56 +52,97 @@
             margin: 0;
             padding: 20px 0;
             box-sizing: border-box;
+            transition: background-color 0.3s;
         }
+
         .container {
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             max-width: 400px;
             width: 90%;
             text-align: center;
         }
-        h2 { margin-top: 0; color: #333; }
-        p { color: #666; font-size: 14px; }
-        input[type="text"] {
+
+        h2 {
+            margin-top: 0;
+        }
+
+        p {
+            color: var(--subtext-color);
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        select {
             width: 100%;
             padding: 10px;
-            margin: 15px 0;
-            border: 1px solid #ccc;
+            margin: 12px 0;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
             box-sizing: border-box;
         }
+
         .colors {
             display: flex;
             justify-content: space-between;
             margin-bottom: 15px;
         }
+
         .color-picker {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             font-size: 13px;
         }
+
         button {
             width: 100%;
-            background-color: #2563eb;
+            background-color: var(--primary-btn);
             color: white;
             border: none;
             padding: 12px;
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: background-color 0.2s;
         }
-        button:hover { background-color: #1d4ed8; }
+
+        button:hover {
+            background-color: var(--primary-btn-hover);
+        }
+
+        .action-group {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .download-row {
+            display: flex;
+            gap: 10px;
+        }
 
         .download-btn {
-            background-color: #10b981;
-            margin-top: 15px;
-            display: none;
+            background-color: var(--success-btn);
+            flex: 1;
         }
-        .download-btn:hover { background-color: #059669; }
+
+        .download-btn:hover {
+            background-color: var(--success-btn-hover);
+        }
+
+        .copy-btn {
+            background-color: #6366f1;
+        }
+
+        .copy-btn:hover {
+            background-color: #4f46e5;
+        }
 
         #qrcode {
             margin-top: 20px;
@@ -75,116 +150,268 @@
             justify-content: center;
         }
 
-        /* Footer Stilleri */
         footer {
             margin-top: 25px;
             font-size: 13px;
-            color: #6b7280;
+            color: var(--subtext-color);
             text-align: center;
         }
+
         footer a {
-            color: #2563eb;
+            color: var(--primary-btn);
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.2s;
         }
+
         footer a:hover {
-            color: #1d4ed8;
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>🚀 QR Kod Üretici</h2>
-    <p>Statik ve süresi asla dolmayan QR kodlar üretin.</p>
-    
-    <input type="text" id="text" placeholder="https://example.com veya bir metin girin">
-    
-    <div class="colors">
-        <div class="color-picker">
-            <label>Çizgi:</label>
-            <input type="color" id="colorDark" value="#000000">
+    <div class="container">
+        <h2>🚀 QR Kod Üretici</h2>
+        <p>Statik ve süresi asla dolmayan QR kodlar üretin.</p>
+
+        <input type="text" id="text" placeholder="https://example.com veya bir metin girin">
+
+        <div class="colors">
+            <div class="color-picker">
+                <label>Çizgi:</label>
+                <input type="color" id="colorDark" value="#000000">
+            </div>
+            <div class="color-picker">
+                <label>Zemin:</label>
+                <input type="color" id="colorLight" value="#ffffff">
+            </div>
         </div>
-        <div class="color-picker">
-            <label>Zemin:</label>
-            <input type="color" id="colorLight" value="#ffffff">
+
+        <button onclick="generateQR()">QR Kod Oluştur</button>
+
+        <div id="qrcode"></div>
+
+        <div id="actionGroup" class="action-group">
+            <select id="formatSelect">
+                <option value="png">PNG Formatı (Web / Dijital)</option>
+                <option value="jpg">JPG Formatı (Fotoğraf / Genel)</option>
+                <option value="svg">SVG Formatı (Vektörel)</option>
+                <option value="pdf">PDF Formatı (Doküman)</option>
+                <option value="tiff">TIFF Formatı (Baskı / Arşiv)</option>
+            </select>
+
+            <div class="download-row">
+                <button class="download-btn" onclick="downloadSelectedFormat()">İndir</button>
+                <button id="copyBtn" class="copy-btn" onclick="copyToClipboard()">Panoya Kopyala</button>
+            </div>
         </div>
     </div>
 
-    <button onclick="generateQR()">QR Kod Oluştur</button>
+    <footer>
+        Açık kaynak projedir • <a href="https://github.com/kinefi/karekod" target="_blank"
+            rel="noopener noreferrer">GitHub Deposu</a>
+    </footer>
 
-    <div id="qrcode"></div>
+    <script>
+        let qrObj = null;
 
-    <button id="downloadBtn" class="download-btn" onclick="downloadQR()">PNG Olarak İndir</button>
-</div>
-
-<!-- Footer Alanı -->
-<footer>
-    Açık kaynak projedir • <a href="https://github.com/kinefi/karekod" target="_blank" rel="noopener noreferrer">GitHub Deposu</a>
-</footer>
-
-<script>
-    let qrcode = null;
-
-    function generateQR() {
-        const text = document.getElementById("text").value;
-        const colorDark = document.getElementById("colorDark").value;
-        const colorLight = document.getElementById("colorLight").value;
-        const qrContainer = document.getElementById("qrcode");
-        const downloadBtn = document.getElementById("downloadBtn");
-
-        if (!text.trim()) {
-            alert("Lütfen bir metin veya URL girin!");
-            return;
-        }
-
-        qrContainer.innerHTML = "";
-
-        qrcode = new QRCode(qrContainer, {
-            text: text,
-            width: 250,
-            height: 250,
-            colorDark : colorDark,
-            colorLight : colorLight,
-            correctLevel : QRCode.CorrectLevel.H
+        document.getElementById("text").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                generateQR();
+            }
         });
 
-        downloadBtn.style.display = "block";
-    }
+        function generateQR() {
+            const text = document.getElementById("text").value;
+            const colorDark = document.getElementById("colorDark").value;
+            const colorLight = document.getElementById("colorLight").value;
+            const qrContainer = document.getElementById("qrcode");
+            const actionGroup = document.getElementById("actionGroup");
 
-    function getRandomHex(length = 8) {
-        const bytes = new Uint8Array(length / 2);
-        window.crypto.getRandomValues(bytes);
-        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
-    }
+            if (!text.trim()) {
+                alert("Lütfen bir metin veya URL girin!");
+                return;
+            }
 
-    function downloadQR() {
-        const qrContainer = document.getElementById("qrcode");
-        const canvas = qrContainer.querySelector("canvas");
-        const img = qrContainer.querySelector("img");
+            qrContainer.innerHTML = "";
 
-        let imageSrc = "";
-        if (canvas) {
-            imageSrc = canvas.toDataURL("image/png");
-        } else if (img && img.src) {
-            imageSrc = img.src;
-        } else {
-            alert("QR Kod indirilemedi!");
-            return;
+            qrObj = new QRCode(qrContainer, {
+                text: text,
+                width: 250,
+                height: 250,
+                colorDark: colorDark,
+                colorLight: colorLight,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            actionGroup.style.display = "flex";
         }
 
-        const fileName = getRandomHex(8) + ".png";
+        async function getContentHash(text, length = 8) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex.substring(0, length);
+        }
 
-        const link = document.createElement("a");
-        link.href = imageSrc;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-</script>
+        async function downloadSelectedFormat() {
+            const text = document.getElementById("text").value;
+            const format = document.getElementById("formatSelect").value;
+            const qrContainer = document.getElementById("qrcode");
+            const canvas = qrContainer.querySelector("canvas");
+
+            if (!canvas || !text.trim()) return;
+
+            const fileHash = await getContentHash(text.trim(), 8);
+            const fileName = `${fileHash}.${format}`;
+
+            if (format === "png") {
+                downloadDataURI(canvas.toDataURL("image/png"), fileName);
+            }
+            else if (format === "jpg") {
+                // JPG için kaliteli 0.92 (JPEG compression) çıktısı
+                downloadDataURI(canvas.toDataURL("image/jpeg", 0.92), fileName);
+            }
+            else if (format === "pdf") {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+                const imgData = canvas.toDataURL("image/png");
+                pdf.addImage(imgData, "PNG", 65, 80, 80, 80);
+                pdf.save(fileName);
+            }
+            else if (format === "svg") {
+                const colorDark = document.getElementById("colorDark").value;
+                const colorLight = document.getElementById("colorLight").value;
+                const svgData = generateCleanSVG(qrObj, colorDark, colorLight);
+                const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+                downloadDataURI(URL.createObjectURL(blob), fileName);
+            }
+            else if (format === "tiff") {
+                const tiffBlob = createUncompressedTIFF(canvas);
+                downloadDataURI(URL.createObjectURL(tiffBlob), fileName);
+            }
+        }
+
+        async function copyToClipboard() {
+            const canvas = document.getElementById("qrcode").querySelector("canvas");
+            const copyBtn = document.getElementById("copyBtn");
+            if (!canvas) return;
+
+            try {
+                canvas.toBlob(async (blob) => {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    await navigator.clipboard.write([item]);
+                    const originalText = copyBtn.innerText;
+                    copyBtn.innerText = "Kopyalandı! ✓";
+                    setTimeout(() => { copyBtn.innerText = originalText; }, 2000);
+                });
+            } catch (err) {
+                alert("Panoya kopyalama bu tarayıcıda desteklenmiyor.");
+            }
+        }
+
+        function downloadDataURI(uri, name) {
+            const link = document.createElement("a");
+            link.href = uri;
+            link.download = name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // QRCode.js nesnesinden doğrudan saf ve ultra-hafif vektörel SVG üretimi
+        function generateCleanSVG(qrInstance, colorDark, colorLight) {
+            if (!qrInstance || !qrInstance._oQRCode) return "";
+            const model = qrInstance._oQRCode;
+            const moduleCount = model.getModuleCount();
+
+            let pathData = "";
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    if (model.isDark(row, col)) {
+                        pathData += `M${col},${row}h1v1h-1z `;
+                    }
+                }
+            }
+
+            return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${moduleCount} ${moduleCount}" width="1000" height="1000">` +
+                `<rect width="100%" height="100%" fill="${colorLight}"/>` +
+                `<path d="${pathData}" fill="${colorDark}"/>` +
+                `</svg>`;
+        }
+
+        function createUncompressedTIFF(canvas) {
+            const ctx = canvas.getContext("2d");
+            const w = canvas.width;
+            const h = canvas.height;
+            const imgData = ctx.getImageData(0, 0, w, h).data;
+
+            const numPixels = w * h;
+            const imageDataSize = numPixels * 3;
+
+            const headerSize = 8;
+            const ifdEntries = 9; // Standart etiket sayısı
+            const ifdSize = 2 + (ifdEntries * 12) + 4;
+            const bitsPerSampleExtraSize = 6;
+
+            const bitsPerSampleOffset = headerSize + ifdSize;
+            const dataOffset = bitsPerSampleOffset + bitsPerSampleExtraSize;
+            const totalSize = dataOffset + imageDataSize;
+
+            const buffer = new ArrayBuffer(totalSize);
+            const view = new DataView(buffer);
+
+            // 1. TIFF Header
+            view.setUint16(0, 0x4949, true); // Little Endian
+            view.setUint16(2, 42, true);
+            view.setUint32(4, 8, true);
+
+            // 2. IFD Entry Count
+            let offset = 8;
+            view.setUint16(offset, ifdEntries, true);
+            offset += 2;
+
+            const writeTag = (tag, type, count, val) => {
+                view.setUint16(offset, tag, true);
+                view.setUint16(offset + 2, type, true);
+                view.setUint32(offset + 4, count, true);
+                view.setUint32(offset + 8, val, true);
+                offset += 12;
+            };
+
+            // 3. Write IFD Tags
+            writeTag(256, 4, 1, w);                    // ImageWidth
+            writeTag(257, 4, 1, h);                    // ImageLength
+            writeTag(258, 3, 3, bitsPerSampleOffset);  // BitsPerSample
+            writeTag(259, 3, 1, 1);                    // Compression (None)
+            writeTag(262, 3, 1, 2);                    // PhotometricInterpretation (RGB)
+            writeTag(273, 4, 1, dataOffset);           // StripOffsets
+            writeTag(277, 3, 1, 3);                    // SamplesPerPixel
+            writeTag(278, 4, 1, h);                    // RowsPerStrip
+            writeTag(279, 4, 1, imageDataSize);        // StripByteCounts
+
+            view.setUint32(offset, 0, true);           // End of IFD
+
+            // 4. BitsPerSample Değerleri (R=8, G=8, B=8)
+            view.setUint16(bitsPerSampleOffset, 8, true);
+            view.setUint16(bitsPerSampleOffset + 2, 8, true);
+            view.setUint16(bitsPerSampleOffset + 4, 8, true);
+
+            // 5. Piksel Verileri (RGBA -> RGB)
+            let p = dataOffset;
+            for (let i = 0; i < imgData.length; i += 4) {
+                view.setUint8(p++, imgData[i]);     // R
+                view.setUint8(p++, imgData[i + 1]); // G
+                view.setUint8(p++, imgData[i + 2]); // B
+            }
+
+            return new Blob([buffer], { type: "image/tiff" });
+        }
+    </script>
 
 </body>
+
 </html>
