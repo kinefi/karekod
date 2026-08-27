@@ -7,19 +7,28 @@
     <title>Süresiz ve Ücretsiz QR & Barkod Üretici</title>
     
     <!-- QR Kod Kütüphanesi -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
-        integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+        integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" 
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer">
+    </script>
 
     <!-- Barkod Kütüphanesi -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"
-        integrity="sha512-wP4hpOv5FuWtzFw52a2iNIUokvY5n5D8Y5419m1B4Z7F82gPZpU556R300zQzS5c6M+s952W1Q0Z8061453=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" 
+        integrity="sha512-k2wo/BkbloaRU7gc/RkCekHr4IOVe10kYxJ/Q8dRPl7u3YshAQmg3WfZtIcseEk+nGBdK03fHBeLgXTxRmWCLQ==" 
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer">
+    </script>
 
     <!-- PDF Kütüphanesi -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-        integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" 
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer">
+    </script>
 
     <style>
         :root {
@@ -162,7 +171,8 @@
 
         <select id="codeType" onchange="toggleCodeType()">
             <option value="qr">QR Kod (2D Matrix)</option>
-            <option value="barcode">Barkod (1D CODE128)</option>
+            <option value="barcode">Barkod (1D CODE128 - Metin/Rakam)</option>
+            <option value="isbn">ISBN / Kitap Barkodu (1D EAN-13)</option>
         </select>
 
         <input type="text" id="text" placeholder="https://example.com veya bir metin girin">
@@ -213,11 +223,39 @@
             }
         });
 
+        // Girdiyi EAN-13 uyumlu 13 haneli ISBN koduna dönüştürür
+        function parseISBN13(input) {
+            let clean = input.replace(/\D/g, ''); // Sadece rakamları al
+            
+            // 978 veya 979 ile başlamıyorsa başına 978 ekle
+            if (!clean.startsWith('978') && !clean.startsWith('979')) {
+                clean = '978' + clean;
+            }
+
+            // İlk 12 haneyi al ve eksikse 0 ile tamamla
+            clean = clean.substring(0, 12);
+            while (clean.length < 12) {
+                clean += '0';
+            }
+
+            // Modulus 10 algoritması ile 13. kontrol hanesini hesapla
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+                const digit = parseInt(clean[i], 10);
+                sum += (i % 2 === 0) ? digit : digit * 3;
+            }
+            const checkDigit = (10 - (sum % 10)) % 10;
+            
+            return clean + checkDigit;
+        }
+
         function toggleCodeType() {
             const type = document.getElementById("codeType").value;
             const input = document.getElementById("text");
             if (type === "barcode") {
                 input.placeholder = "Örn: 1234567890 veya METIN123";
+            } else if (type === "isbn") {
+                input.placeholder = "Örn: 978-625-00-4629-6 veya 625004629";
             } else {
                 input.placeholder = "https://example.com veya bir metin girin";
             }
@@ -252,16 +290,32 @@
                 qrContainer.appendChild(canvas);
 
                 try {
-                    JsBarcode(canvas, text, {
-                        format: "CODE128",
-                        lineColor: colorDark,
-                        background: colorLight,
-                        width: 2,
-                        height: 100,
-                        displayValue: true
-                    });
+                    if (currentType === "isbn") {
+                        const ean13Code = parseISBN13(text);
+                        JsBarcode(canvas, ean13Code, {
+                            format: "EAN13",
+                            lineColor: colorDark,
+                            background: colorLight,
+                            width: 3,        // Yüksek çözünürlük
+                            height: 140,     // Yüksek çözünürlük
+                            margin: 15,
+                            fontSize: 20,
+                            displayValue: true
+                        });
+                    } else {
+                        JsBarcode(canvas, text.trim(), {
+                            format: "CODE128",
+                            lineColor: colorDark,
+                            background: colorLight,
+                            width: 3,        // Yüksek çözünürlük
+                            height: 140,     // Yüksek çözünürlük
+                            margin: 15,
+                            fontSize: 20,
+                            displayValue: true
+                        });
+                    }
                 } catch (e) {
-                    alert("Barkod oluşturulamadı! Karakter kümesini kontrol edin.");
+                    alert("Barkod oluşturulamadı! Karakter kümesini veya numarayı kontrol edin.");
                     actionGroup.style.display = "none";
                     return;
                 }
@@ -287,8 +341,16 @@
 
             if (!canvas || !text.trim()) return;
 
-            const fileHash = await getContentHash(text.trim(), 8);
-            const fileName = `${fileHash}.${format}`;
+            let fileNameBase = "";
+            
+            // ISBN seçilmişse dosya adını direkt girilen metinden oluştur (geçersiz karakterleri temizleyerek)
+            if (currentType === "isbn") {
+                fileNameBase = text.trim().replace(/[/\\?%*:|"<>]/g, '');
+            } else {
+                fileNameBase = await getContentHash(text.trim(), 8);
+            }
+
+            const fileName = `${fileNameBase}.${format}`;
 
             if (format === "png") {
                 downloadDataURI(canvas.toDataURL("image/png"), fileName);
@@ -303,7 +365,7 @@
                 if (currentType === "qr") {
                     pdf.addImage(imgData, "PNG", 65, 80, 80, 80);
                 } else {
-                    pdf.addImage(imgData, "PNG", 40, 90, 130, 60);
+                    pdf.addImage(imgData, "PNG", 35, 90, 140, 60);
                 }
                 pdf.save(fileName);
             }
@@ -316,12 +378,17 @@
                     svgData = generateCleanSVG(qrObj, colorDark, colorLight);
                 } else {
                     const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                    JsBarcode(svgNode, text.trim(), {
-                        format: "CODE128",
+                    const barcodeText = (currentType === "isbn") ? parseISBN13(text) : text.trim();
+                    const barcodeFormat = (currentType === "isbn") ? "EAN13" : "CODE128";
+                    
+                    JsBarcode(svgNode, barcodeText, {
+                        format: barcodeFormat,
                         lineColor: colorDark,
                         background: colorLight,
-                        width: 2,
-                        height: 100,
+                        width: 3,
+                        height: 140,
+                        margin: 15,
+                        fontSize: 20,
                         displayValue: true
                     });
                     svgData = new XMLSerializer().serializeToString(svgNode);
