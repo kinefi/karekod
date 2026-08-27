@@ -4,18 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Süresiz ve Ücretsiz QR Kod Üretici</title>
+    <title>Süresiz ve Ücretsiz QR & Barkod Üretici</title>
+    
     <!-- QR Kod Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
         integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-        </script>
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Barkod Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"
+        integrity="sha512-wP4hpOv5FuWtzFw52a2iNIUokvY5n5D8Y5419m1B4Z7F82gPZpU556R300zQzS5c6M+s952W1Q0Z8061453=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- PDF Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
         integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-        </script>
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <style>
         :root {
             --bg-color: #f4f7f6;
@@ -29,7 +34,6 @@
             --success-btn-hover: #059669;
         }
 
-        /* Otomatik Koyu Tema */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #0f172a;
@@ -65,17 +69,10 @@
             text-align: center;
         }
 
-        h2 {
-            margin-top: 0;
-        }
+        h2 { margin-top: 0; }
+        p { color: var(--subtext-color); font-size: 14px; }
 
-        p {
-            color: var(--subtext-color);
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        select {
+        input[type="text"], select {
             width: 100%;
             padding: 10px;
             margin: 12px 0;
@@ -111,9 +108,7 @@
             transition: background-color 0.2s;
         }
 
-        button:hover {
-            background-color: var(--primary-btn-hover);
-        }
+        button:hover { background-color: var(--primary-btn-hover); }
 
         .action-group {
             display: none;
@@ -131,23 +126,16 @@
             background-color: var(--success-btn);
             flex: 1;
         }
+        .download-btn:hover { background-color: var(--success-btn-hover); }
 
-        .download-btn:hover {
-            background-color: var(--success-btn-hover);
-        }
-
-        .copy-btn {
-            background-color: #6366f1;
-        }
-
-        .copy-btn:hover {
-            background-color: #4f46e5;
-        }
+        .copy-btn { background-color: #6366f1; }
+        .copy-btn:hover { background-color: #4f46e5; }
 
         #qrcode {
             margin-top: 20px;
             display: flex;
             justify-content: center;
+            overflow-x: auto;
         }
 
         footer {
@@ -162,18 +150,20 @@
             text-decoration: none;
             font-weight: 600;
         }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 
 <body>
 
     <div class="container">
-        <h2>🚀 QR Kod Üretici</h2>
-        <p>Statik ve süresi asla dolmayan QR kodlar üretin.</p>
+        <h2 id="mainTitle">🚀 QR & Barkod Üretici</h2>
+        <p>Statik ve süresi asla dolmayan kodlar üretin.</p>
+
+        <select id="codeType" onchange="toggleCodeType()">
+            <option value="qr">QR Kod (2D Matrix)</option>
+            <option value="barcode">Barkod (1D CODE128)</option>
+        </select>
 
         <input type="text" id="text" placeholder="https://example.com veya bir metin girin">
 
@@ -188,7 +178,7 @@
             </div>
         </div>
 
-        <button onclick="generateQR()">QR Kod Oluştur</button>
+        <button id="generateBtn" onclick="generateCode()">Kod Oluştur</button>
 
         <div id="qrcode"></div>
 
@@ -215,14 +205,25 @@
 
     <script>
         let qrObj = null;
+        let currentType = "qr";
 
         document.getElementById("text").addEventListener("keypress", function (event) {
             if (event.key === "Enter") {
-                generateQR();
+                generateCode();
             }
         });
 
-        function generateQR() {
+        function toggleCodeType() {
+            const type = document.getElementById("codeType").value;
+            const input = document.getElementById("text");
+            if (type === "barcode") {
+                input.placeholder = "Örn: 1234567890 veya METIN123";
+            } else {
+                input.placeholder = "https://example.com veya bir metin girin";
+            }
+        }
+
+        function generateCode() {
             const text = document.getElementById("text").value;
             const colorDark = document.getElementById("colorDark").value;
             const colorLight = document.getElementById("colorLight").value;
@@ -230,20 +231,41 @@
             const actionGroup = document.getElementById("actionGroup");
 
             if (!text.trim()) {
-                alert("Lütfen bir metin veya URL girin!");
+                alert("Lütfen bir metin veya kod girin!");
                 return;
             }
 
             qrContainer.innerHTML = "";
+            currentType = document.getElementById("codeType").value;
 
-            qrObj = new QRCode(qrContainer, {
-                text: text,
-                width: 250,
-                height: 250,
-                colorDark: colorDark,
-                colorLight: colorLight,
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            if (currentType === "qr") {
+                qrObj = new QRCode(qrContainer, {
+                    text: text,
+                    width: 250,
+                    height: 250,
+                    colorDark: colorDark,
+                    colorLight: colorLight,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } else {
+                const canvas = document.createElement("canvas");
+                qrContainer.appendChild(canvas);
+
+                try {
+                    JsBarcode(canvas, text, {
+                        format: "CODE128",
+                        lineColor: colorDark,
+                        background: colorLight,
+                        width: 2,
+                        height: 100,
+                        displayValue: true
+                    });
+                } catch (e) {
+                    alert("Barkod oluşturulamadı! Karakter kümesini kontrol edin.");
+                    actionGroup.style.display = "none";
+                    return;
+                }
+            }
 
             actionGroup.style.display = "flex";
         }
@@ -272,20 +294,39 @@
                 downloadDataURI(canvas.toDataURL("image/png"), fileName);
             }
             else if (format === "jpg") {
-                // JPG için kaliteli 0.92 (JPEG compression) çıktısı
                 downloadDataURI(canvas.toDataURL("image/jpeg", 0.92), fileName);
             }
             else if (format === "pdf") {
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
                 const imgData = canvas.toDataURL("image/png");
-                pdf.addImage(imgData, "PNG", 65, 80, 80, 80);
+                if (currentType === "qr") {
+                    pdf.addImage(imgData, "PNG", 65, 80, 80, 80);
+                } else {
+                    pdf.addImage(imgData, "PNG", 40, 90, 130, 60);
+                }
                 pdf.save(fileName);
             }
             else if (format === "svg") {
                 const colorDark = document.getElementById("colorDark").value;
                 const colorLight = document.getElementById("colorLight").value;
-                const svgData = generateCleanSVG(qrObj, colorDark, colorLight);
+                let svgData = "";
+
+                if (currentType === "qr") {
+                    svgData = generateCleanSVG(qrObj, colorDark, colorLight);
+                } else {
+                    const svgNode = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    JsBarcode(svgNode, text.trim(), {
+                        format: "CODE128",
+                        lineColor: colorDark,
+                        background: colorLight,
+                        width: 2,
+                        height: 100,
+                        displayValue: true
+                    });
+                    svgData = new XMLSerializer().serializeToString(svgNode);
+                }
+
                 const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
                 downloadDataURI(URL.createObjectURL(blob), fileName);
             }
@@ -322,7 +363,6 @@
             document.body.removeChild(link);
         }
 
-        // QRCode.js nesnesinden doğrudan saf ve ultra-hafif vektörel SVG üretimi
         function generateCleanSVG(qrInstance, colorDark, colorLight) {
             if (!qrInstance || !qrInstance._oQRCode) return "";
             const model = qrInstance._oQRCode;
@@ -353,7 +393,7 @@
             const imageDataSize = numPixels * 3;
 
             const headerSize = 8;
-            const ifdEntries = 9; // Standart etiket sayısı
+            const ifdEntries = 9;
             const ifdSize = 2 + (ifdEntries * 12) + 4;
             const bitsPerSampleExtraSize = 6;
 
@@ -364,12 +404,10 @@
             const buffer = new ArrayBuffer(totalSize);
             const view = new DataView(buffer);
 
-            // 1. TIFF Header
-            view.setUint16(0, 0x4949, true); // Little Endian
+            view.setUint16(0, 0x4949, true);
             view.setUint16(2, 42, true);
             view.setUint32(4, 8, true);
 
-            // 2. IFD Entry Count
             let offset = 8;
             view.setUint16(offset, ifdEntries, true);
             offset += 2;
@@ -382,30 +420,27 @@
                 offset += 12;
             };
 
-            // 3. Write IFD Tags
-            writeTag(256, 4, 1, w);                    // ImageWidth
-            writeTag(257, 4, 1, h);                    // ImageLength
-            writeTag(258, 3, 3, bitsPerSampleOffset);  // BitsPerSample
-            writeTag(259, 3, 1, 1);                    // Compression (None)
-            writeTag(262, 3, 1, 2);                    // PhotometricInterpretation (RGB)
-            writeTag(273, 4, 1, dataOffset);           // StripOffsets
-            writeTag(277, 3, 1, 3);                    // SamplesPerPixel
-            writeTag(278, 4, 1, h);                    // RowsPerStrip
-            writeTag(279, 4, 1, imageDataSize);        // StripByteCounts
+            writeTag(256, 4, 1, w);                    
+            writeTag(257, 4, 1, h);                    
+            writeTag(258, 3, 3, bitsPerSampleOffset);  
+            writeTag(259, 3, 1, 1);                    
+            writeTag(262, 3, 1, 2);                    
+            writeTag(273, 4, 1, dataOffset);           
+            writeTag(277, 3, 1, 3);                    
+            writeTag(278, 4, 1, h);                    
+            writeTag(279, 4, 1, imageDataSize);        
 
-            view.setUint32(offset, 0, true);           // End of IFD
+            view.setUint32(offset, 0, true);           
 
-            // 4. BitsPerSample Değerleri (R=8, G=8, B=8)
             view.setUint16(bitsPerSampleOffset, 8, true);
             view.setUint16(bitsPerSampleOffset + 2, 8, true);
             view.setUint16(bitsPerSampleOffset + 4, 8, true);
 
-            // 5. Piksel Verileri (RGBA -> RGB)
             let p = dataOffset;
             for (let i = 0; i < imgData.length; i += 4) {
-                view.setUint8(p++, imgData[i]);     // R
-                view.setUint8(p++, imgData[i + 1]); // G
-                view.setUint8(p++, imgData[i + 2]); // B
+                view.setUint8(p++, imgData[i]);     
+                view.setUint8(p++, imgData[i + 1]); 
+                view.setUint8(p++, imgData[i + 2]); 
             }
 
             return new Blob([buffer], { type: "image/tiff" });
